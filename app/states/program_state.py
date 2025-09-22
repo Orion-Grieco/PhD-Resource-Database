@@ -35,7 +35,7 @@ class ProgramState(rx.State):
             async with rx.asession() as session:
                 result = await session.execute(
                     text(
-                        "SELECT id, university_name, program_name, department, degree_type, research_area, strftime('%Y-%m-%d', application_deadline) as application_deadline, tuition_in_state, tuition_out_of_state, url, description FROM program ORDER BY university_name;"
+                        "SELECT id, university_name, program_name, department, degree_type, research_area, TO_CHAR(application_deadline, 'YYYY-MM-DD') as application_deadline, tuition_in_state, tuition_out_of_state, url, description FROM program ORDER BY university_name;"
                     )
                 )
                 rows = result.mappings().all()

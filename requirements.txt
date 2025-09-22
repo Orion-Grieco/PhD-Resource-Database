@@ -1,4 +1,5 @@
 
 reflex==0.8.11
 sqlalchemy
-
+psycopg2-binary
+psycopg2-binary
