@@ -3,6 +3,7 @@ from app.components.header import header_component
 from app.components.filter_bar import filter_bar
 from app.components.program_table import program_table
 from app.states.program_state import ProgramState
+from app.pages.projects import projects
 
 
 def index() -> rx.Component:
@@ -29,3 +30,4 @@ app = rx.App(
     ],
 )
 app.add_page(index, on_load=ProgramState.get_all_programs)
+app.add_page(projects, route="/projects")

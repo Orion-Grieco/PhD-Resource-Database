@@ -12,6 +12,19 @@ def header_component() -> rx.Component:
                 ),
                 class_name="flex items-center gap-4",
             ),
+            rx.el.nav(
+                rx.el.a(
+                    "Programs",
+                    href="/",
+                    class_name="text-sm font-medium text-gray-600 hover:text-gray-900",
+                ),
+                rx.el.a(
+                    "Projects & Ideas",
+                    href="/projects",
+                    class_name="text-sm font-medium text-gray-600 hover:text-gray-900",
+                ),
+                class_name="flex items-center gap-6",
+            ),
             class_name="flex items-center justify-between w-full",
         ),
         class_name="bg-white p-4 border-b border-gray-200 sticky top-0 z-10",

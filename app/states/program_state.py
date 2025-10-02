@@ -85,6 +85,7 @@ class ProgramState(rx.State):
             list(set((p["research_area"] for p in self.programs if p["research_area"])))
         )
 
+    @rx.event
     def clear_filters(self):
         self.search_query = ""
         self.selected_degree = ""
