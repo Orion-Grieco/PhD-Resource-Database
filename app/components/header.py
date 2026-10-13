@@ -19,6 +19,11 @@ def header_component() -> rx.Component:
                     class_name="text-sm font-medium text-gray-600 hover:text-gray-900",
                 ),
                 rx.el.a(
+                    "Add Program",
+                    href="/add",
+                    class_name="text-sm font-medium text-gray-600 hover:text-gray-900",
+                ),
+                rx.el.a(
                     "Projects & Ideas",
                     href="/projects",
                     class_name="text-sm font-medium text-gray-600 hover:text-gray-900",

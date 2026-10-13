@@ -4,6 +4,10 @@ from app.components.filter_bar import filter_bar
 from app.components.program_table import program_table
 from app.states.program_state import ProgramState
 from app.pages.projects import projects
+from app.pages.add_program import add_program
+from app.states.add_program_state import AddProgramState
+from app.components.pending_changes import pending_changes, toolbar
+from app.scraper.recheck import recheck_loop
 
 
 def index() -> rx.Component:
@@ -11,7 +15,7 @@ def index() -> rx.Component:
         header_component(),
         rx.el.main(
             filter_bar(),
-            rx.el.div(program_table(), class_name="p-4 md:p-6"),
+            rx.el.div(toolbar(), pending_changes(), program_table(), class_name="p-4 md:p-6"),
             class_name="flex-1",
         ),
         class_name="font-['IBM_Plex_Sans'] bg-white min-h-screen flex flex-col",
@@ -31,3 +35,5 @@ app = rx.App(
 )
 app.add_page(index, on_load=ProgramState.get_all_programs)
 app.add_page(projects, route="/projects")
+app.add_page(add_program, route="/add", title="Add Program", on_load=AddProgramState.load_page)
+app.register_lifespan_task(recheck_loop)

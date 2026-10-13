@@ -14,7 +14,7 @@ def filter_bar() -> rx.Component:
                     placeholder="Search programs, universities...",
                     on_change=ProgramState.set_search_query,
                     class_name="w-full h-[40px] pl-10 pr-4 bg-white border border-gray-300 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500",
-                    default_value=ProgramState.search_query,
+                    value=ProgramState.search_query,
                 ),
                 class_name="relative w-full lg:w-1/3",
             ),
