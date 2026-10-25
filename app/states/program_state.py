@@ -3,8 +3,9 @@ from typing import TypedDict
 import logging
 import sqlmodel
 
+from app import storage
 from app.models import Program as ProgramModel, ProgramChange, STATUSES
-from app.scraper.extract import normalize
+from app.scraper.extract import FIELDS, normalize
 from app.scraper.recheck import recheck_programs
 
 
@@ -158,15 +159,20 @@ class ProgramState(rx.State):
             change = session.get(ProgramChange, change_id)
             if change is None:
                 return
-            if accept:
-                program = session.get(ProgramModel, change.program_id)
-                if program:
-                    value = normalize({change.field: change.new_value})[change.field]
-                    setattr(program, change.field, value)
-                    session.add(program)
+            program = session.get(ProgramModel, change.program_id)
+            if accept and program:
+                value = normalize({change.field: change.new_value})[change.field]
+                setattr(program, change.field, value)
+                session.add(program)
             change.resolved = True
             session.add(change)
             session.commit()
+            if program:
+                # Accepting or dismissing confirms the program's values for the page as last fetched.
+                storage.save_labels(
+                    program.page_hash,
+                    {**{name: getattr(program, name) for name in FIELDS}, "url": program.url},
+                )
         self._load()
 
     @rx.event(background=True)

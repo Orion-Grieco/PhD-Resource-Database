@@ -27,6 +27,7 @@ import os
 import re
 from typing import Any
 
+from app import storage
 from app.scraper.fetch import Page
 
 FIELDS = (
@@ -212,16 +213,18 @@ class RuleExtractor:
 # ------------------------------------------------------------------- loading
 
 _extractor = None
+_extractor_name = "RuleExtractor"
 
 
 def get_extractor():
-    global _extractor
+    global _extractor, _extractor_name
     if _extractor is None:
         spec = os.getenv("PROGRAM_EXTRACTOR", "").strip()
         if spec:
             module_name, _, attr = spec.partition(":")
             obj = getattr(importlib.import_module(module_name), attr or "extract")
             _extractor = obj() if inspect.isclass(obj) else obj
+            _extractor_name = spec
             logging.info("Using program extractor %s", spec)
         else:
             _extractor = RuleExtractor()
@@ -229,7 +232,7 @@ def get_extractor():
 
 
 async def extract_program(page: Page) -> dict:
-    """Run the configured extractor on `page` and return normalized fields."""
+    """Run the configured extractor on `page`, store the page in the data folder, and return normalized fields."""
     extractor = get_extractor()
     fn = extractor.extract if hasattr(extractor, "extract") else extractor
     if inspect.iscoroutinefunction(fn):
@@ -238,4 +241,6 @@ async def extract_program(page: Page) -> dict:
         raw = await asyncio.to_thread(fn, page)
         if inspect.isawaitable(raw):
             raw = await raw
-    return normalize(raw)
+    fields = normalize(raw)
+    storage.save_page(page, fields, _extractor_name)
+    return fields

@@ -7,3 +7,6 @@ assets/external/
 .states/
 __pycache__/
 /app/__pycache__/
+
+# Local app data: database and saved program pages
+data/

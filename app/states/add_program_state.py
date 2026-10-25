@@ -1,7 +1,9 @@
 import reflex as rx
 import logging
+import time
 import sqlmodel
 
+from app import storage
 from app.models import Program, STATUSES
 from app.scraper.extract import FIELDS, extract_program, normalize
 from app.scraper.fetch import FetchError, fetch_page
@@ -24,17 +26,27 @@ class AddProgramState(rx.State):
     error: str = ""
     saved_message: str = ""
     editing_id: int = 0
+    # When the user last did something here. Reflex can deliver on_load twice when a page is
+    # reached before the first connection finishes, so load_page must not undo recent actions.
+    _last_action: float = 0.0
+
+    def _touch(self):
+        self._last_action = time.monotonic()
 
     @rx.event
     def load_page(self):
         """On load: `/add?edit=<id>` opens that program for editing; plain `/add` starts fresh."""
-        self.error = ""
-        self.saved_message = ""
         edit = self.router.url.query_parameters.get("edit", "")
         if not edit:
             if self.editing_id:
                 self._reset_form()
+            if not self.parsing and time.monotonic() - self._last_action > 3:
+                self.error = ""
+                self.saved_message = ""
             return
+        if edit.isdigit() and int(edit) == self.editing_id and self.parsed:
+            return  # already open; don't overwrite in-progress edits
+        self.saved_message = ""
         with rx.session() as session:
             program = session.get(Program, int(edit)) if edit.isdigit() else None
             if program is None:
@@ -61,14 +73,17 @@ class AddProgramState(rx.State):
 
     @rx.event
     def set_link(self, value: str):
+        self._touch()
         self.link = value
 
     @rx.event
     def set_form_field(self, name: str, value: str):
+        self._touch()
         self.form[name] = value
 
     @rx.event
     def start_manual(self):
+        self._touch()
         self._reset_form()
         self.form = _empty_form()
         self.form["url"] = self.link.strip()
@@ -82,6 +97,7 @@ class AddProgramState(rx.State):
         async with self:
             if self.parsing or not self.link.strip():
                 return
+            self._touch()
             self.parsing = True
             self.error = ""
             self.saved_message = ""
@@ -106,10 +122,12 @@ class AddProgramState(rx.State):
                 self.error = f"Something went wrong while parsing that page: {e}"
         finally:
             async with self:
+                self._touch()
                 self.parsing = False
 
     @rx.event
     def save(self):
+        self._touch()
         form = self.form
         if not (form["university_name"].strip() or form["program_name"].strip()):
             self.error = "Enter at least a university or program name."
@@ -133,6 +151,7 @@ class AddProgramState(rx.State):
                 if program is None:
                     self.error = "That program no longer exists."
                     return
+                storage.save_labels(program.page_hash, {**values, "url": url})
                 if url != program.url:
                     program.page_hash = ""  # new page: re-extract on the next re-check
                 for name, value in values.items():
@@ -154,6 +173,7 @@ class AddProgramState(rx.State):
                 )
             )
             session.commit()
+        storage.save_labels(self.page_hash, {**values, "url": url})
         label = values["program_name"] or values["university_name"]
         self.link = ""
         self._reset_form()
