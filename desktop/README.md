@@ -3,6 +3,17 @@
 Packages the app as a Windows program: a launcher exe that runs the backend
 locally and shows the app in its own window (Edge WebView2), plus an installer.
 
+## Install
+
+1. Build the installer (below), or use the last one in `dist\installer\` (gitignored,
+   so your editor may hide it).
+2. Run `dist\installer\PhDProgramFinder-<version>-setup.exe`. It installs for your
+   user only, with no admin prompt. Optionally tick "Create a desktop shortcut".
+3. Start **PhD Program Finder** from the Start menu or desktop shortcut.
+
+Uninstall from Settings → Apps. Your data folder is kept.
+Inno Setup is only needed to build the installer, not to install or run the app.
+
 ## Build
 
 ```powershell
