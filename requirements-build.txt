@@ -1,0 +1,4 @@
+# Extra packages for building the desktop app (build.ps1). Install on top of requirements.txt.
+pyinstaller==6.22.3
+pywebview==6.2.1
+uvicorn==0.54.0

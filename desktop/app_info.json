@@ -1,0 +1,8 @@
+{
+  "name": "PhD Program Finder",
+  "exe_name": "PhDProgramFinder",
+  "version": "0.1.0",
+  "publisher": "Orion Grieco",
+  "port": 47821,
+  "app_id": "{7C1E9B52-3F4A-4E8D-9B0A-2D6F5C8A1E37}"
+}
